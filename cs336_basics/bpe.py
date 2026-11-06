@@ -84,7 +84,10 @@ def train_bpe (input_path:str, vocab_size:int = 266, special_tokens:list[str] = 
     word_frequencies_encode = word_frequencies_encode_new
 
     while len(vocab) <  vocab_size:
+<<<<<<< HEAD
         merge.pop(best_pair)
+=======
+>>>>>>> e622f274376e00b6fae96241d3a666f496b04d07
 
         for word, frequency in word_frequencies_encode.items():
             if len(word) > 1:
@@ -101,8 +104,12 @@ def train_bpe (input_path:str, vocab_size:int = 266, special_tokens:list[str] = 
                             merge[best_pair] = merge.get(best_pair, 0) -  frequency
                         elif tokens[0] == best_pair[0] + best_pair[1] and tokens[1] == best_pair[0] + best_pair[1]:
                             merge[tokens] = merge.get(tokens, 0) + frequency
+<<<<<<< HEAD
                             merge[(best_pair[1], best_pair[0])] = merge.get((best_pair[1], best_pair[0]), 0) - frequency
 
+=======
+                            merge[best_pair] = merge.get(best_pair, 0) - 2 * frequency
+>>>>>>> e622f274376e00b6fae96241d3a666f496b04d07
         
         best_pair = max(merge, key=lambda pair: (merge[pair], pair))
         merge_result.append(best_pair)
