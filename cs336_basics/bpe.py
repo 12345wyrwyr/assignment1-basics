@@ -76,7 +76,6 @@ def train_bpe (input_path:str, vocab_size:int = 266, special_tokens:list[str] = 
                             merge[tokens] = merge.get(tokens, 0) + frequency
                             merge[(best_pair[1], best_pair[0])] = merge.get((best_pair[1], best_pair[0]), 0) - frequency
 
-        
         best_pair = max(merge, key=lambda pair: (merge[pair], pair))
         merge_result.append(best_pair)
         vocab[len(vocab)] = best_pair[0] + best_pair[1]
