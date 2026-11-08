@@ -1,26 +1,46 @@
 import re
 import regex
+from cs336_basics.pretokenization_example import find_chunk_boundaries
+from multiprocessing import Pool
+
+def process_chunk(text, PAT):
+    word_frequencies = {}
+
+    for piece in text:
+        for j in regex.finditer(PAT, piece):
+            word = j.group()
+            word_frequencies[word] = (word_frequencies.get(word, 0) + 1)
+    return word_frequencies
 
 def train_bpe (input_path:str, vocab_size:int = 266, special_tokens:list[str] = []): 
     """
     train bpe
     """
-    with open(input_path, "r", encoding="utf-8") as file:
-        text = file.read()
     special_tokens_joined = "|".join(re.escape(token) for token in special_tokens)
-    text = re.split(special_tokens_joined,text)
     PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-    text_pretokenization = [[] for i in range(len(text))]
     word_frequencies = {}
+    chunks = []
+    num_processes = 4
     
-    for i in range(len(text)):
-        for j in regex.finditer(PAT, text[i]):
-            text_pretokenization[i].append(j.group())
+    with open(input_path, "rb") as f:
+        boundaries = find_chunk_boundaries(f, num_processes, b"<|endoftext|>")
 
-    for i in range(len(text_pretokenization)):
-        for j in text_pretokenization[i]:
-            word_frequencies[j] = word_frequencies.get(j, 0) + 1
+        for start, end in zip(boundaries[:-1], boundaries[1:]):
+            f.seek(start)
+            chunk = f.read(end - start).decode("utf-8", errors="ignore")
+            chunk= re.split(special_tokens_joined,chunk)
+            chunks.append(chunk)
+            # Run pre-tokenization on your chunk and store the counts for each pre-token
 
+    tasks = [(chunk, PAT) for chunk in chunks]
+
+    with Pool(processes=num_processes) as pool:
+        results = pool.starmap(process_chunk, tasks)
+    for i in range(len(chunks) - 1):
+        for word, frequency in results[i + 1].items():
+            results[0][word] = results[0].get(word, 0) + frequency
+    word_frequencies = results[0]
+    
     word_frequencies_encode = {}
     for word, frequency in word_frequencies.items():
         encoded = word.encode("utf-8")
