@@ -86,11 +86,6 @@ def train_bpe (input_path:str, vocab_size:int = 266, special_tokens:list[str] = 
         word_frequencies_encode.pop(old_word)
         word_frequencies_encode[new_word] = word_frequencies_encode.get(new_word, 0) + frequency
         
-
-    # time_update = 0
-    # time_find = 0
-    # time_apply = 0
-
     while len(vocab) <  vocab_size:
         merge.pop(best_pair)
 
@@ -113,18 +108,9 @@ def train_bpe (input_path:str, vocab_size:int = 266, special_tokens:list[str] = 
                             merge[tokens] = merge.get(tokens, 0) + frequency
                             merge[(best_pair[1], best_pair[0])] = merge.get((best_pair[1], best_pair[0]), 0) - frequency
 
-        # time_update += time.perf_counter() - t
-
-        # t = time.perf_counter()
-
         best_pair = max(merge, key=lambda pair: (merge[pair], pair))
-
-        # time_find += time.perf_counter() - t
-
         merge_result.append(best_pair)
         vocab[len(vocab)] = best_pair[0] + best_pair[1]
-
-        # t = time.perf_counter()
 
         updates = []
         for word, frequency in word_frequencies_encode.items():
@@ -147,12 +133,6 @@ def train_bpe (input_path:str, vocab_size:int = 266, special_tokens:list[str] = 
             word_frequencies_encode.pop(old_word)
             word_frequencies_encode[new_word] = word_frequencies_encode.get(new_word, 0) + frequency
 
-        time_apply += time.perf_counter() - t
-
-    # print("Pair update:", time_update)
-    # print("Find best pair:", time_find)
-    # print("Apply merge:", time_apply)
-    # print("Total:", time_update + time_find + time_apply)
 
     return vocab, merge_result
 
