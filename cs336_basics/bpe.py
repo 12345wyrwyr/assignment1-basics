@@ -20,7 +20,7 @@ def train_bpe (input_path:str, vocab_size:int = 266, special_tokens:list[str] = 
     PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
     word_frequencies = {}
     chunks = []
-    num_processes = 4
+    num_processes = 8
     
     with open(input_path, "rb") as f:
         boundaries = find_chunk_boundaries(f, num_processes, b"<|endoftext|>")
